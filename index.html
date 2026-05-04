@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Voting System - DevOps Project</title>
+    <style>
+        /* Modern CSS Reset and Styling */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: center; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: #fff;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .container { 
+            background: rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(10px);
+            padding: 40px; 
+            border-radius: 20px; 
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            width: 90%;
+            max-width: 400px;
+        }
+        h1 { margin-bottom: 30px; font-size: 24px; }
+        .vote-section { display: flex; justify-content: space-around; margin-bottom: 30px; }
+        .btn { 
+            padding: 15px 25px; 
+            font-size: 16px; 
+            font-weight: bold;
+            cursor: pointer; 
+            border: none; 
+            border-radius: 12px; 
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.2); }
+        .btn:active { transform: scale(0.95); }
+        .btn-python { background-color: #3776ab; color: white; }
+        .btn-js { background-color: #f7df1e; color: #333; }
+        
+        .results-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+        .stats-label { display: block; font-size: 14px; color: #ddd; margin-bottom: 5px; }
+        .footer-info { font-size: 10px; color: #ccc; opacity: 0.7; }
+        #host-id { color: #f7df1e; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Cloud Voting App</h1>
+        
+        <div class="vote-section">
+            <button class="btn btn-python" onclick="castVote('Python')">Python</button>
+            <button class="btn btn-js" onclick="castVote('JavaScript')">JavaScript</button>
+        </div>
+
+        <div class="results-box">
+            <span class="stats-label">Live Results:</span>
+            <div id="results">Connecting to API...</div>
+        </div>
+        
+        <div class="footer-info">
+            Cloud Node ID: <span id="host-id">Detecting...</span><br>
+            Powered by Docker & Kubernetes Logic
+        </div>
+    </div>
+
+    <script>
+        // Use the current URL as the base for API calls
+        const BASE_URL = window.location.origin;
+        // Function to fetch data from the /stats endpoint
+        async function refreshData() {
+            try {
+                const response = await fetch(`${BASE_URL}/stats`);
+                if (!response.ok) throw new Error("Server Error");
+                
+                const data = await response.json();
+                
+                // Update UI
+                document.getElementById('results').innerHTML = 
+                    `Python: <b>${data.votes.Python}</b> | JS: <b>${data.votes.JavaScript}</b>`;
+                document.getElementById('host-id').innerText = data.container_id;
+            } catch (err) {
+                console.error("Fetch Error:", err);
+                document.getElementById('results').innerText = "System Offline";
+            }
+        }
+        // Function to send a POST request to vote
+        async function castVote(language) {
+            try {
+                const response = await fetch(`${BASE_URL}/vote/${language}`, { 
+                    method: 'POST' 
+                });
+                if (response.ok) {
+                    refreshData(); // Refresh numbers immediately after voting
+                }
+            } catch (err) {
+                alert("Communication failed with the cloud.");
+            }
+        }
+        // Initial fetch when page opens
+        refreshData();
+        // Auto-refresh stats every 5 seconds (Simulating real-time monitoring)
+        setInterval(refreshData, 5000);
+    </script>
+</body>
+</html>
