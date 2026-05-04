@@ -1,0 +1,11 @@
+name: Auto Deploy
+on:
+  push:
+    branches: [main]
+jobs:
+  deploy-job:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sync to Cloud
+        run: echo "The system is ready to sync"
